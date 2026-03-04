@@ -1,0 +1,20 @@
+{
+  "dependencies": [
+    "assimp",
+    "freetype",
+    "glad",
+    "glfw3",
+    "glm",
+    "miniaudio",
+    "spdlog",
+    "stb",
+    "tracy",
+    {
+      "name": "imgui",
+      "features": [
+        "glfw-binding",
+        "opengl3-binding"
+      ]
+    }
+  ]
+}
