@@ -1,3 +1,4 @@
+// ReSharper disable CppMemberFunctionMayBeConst - functions call non-const member(s)
 export module gumlib:registry;
 
 import std;
@@ -41,25 +42,21 @@ export namespace gumlib
 			pools_.resize(max_components);
 		}
 
-		// ReSharper disable once CppMemberFunctionMayBeConst - calls non-const function
 		void update(const float dt)
 		{
 			system_manager_->update(dt);
 		}
 
-		// ReSharper disable once CppMemberFunctionMayBeConst - calls non-const function
 		void render(const float dt)
 		{
 			system_manager_->render(dt);
 		}
 
-		// ReSharper disable once CppMemberFunctionMayBeConst - calls non-const function
 		entity create_entity()
 		{
 			return entity_manager_->create_entity();
 		}
 
-		// ReSharper disable once CppMemberFunctionMayBeConst - calls non-const function
 		void destroy_entity(const entity e)
 		{
 			system_manager_->entity_destroyed(e);
@@ -101,6 +98,7 @@ export namespace gumlib
 			system_manager_->entity_signature_changed(e, entity_manager_->get_signature(e));
 		}
 
+		// return a view of entities that contain Components
 		template <typename... Components>
 		View view()
 		{

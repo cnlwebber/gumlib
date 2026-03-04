@@ -1,3 +1,4 @@
+// ReSharper disable CppMemberFunctionMayBeConst - functions call non-const member(s)
 export module gumlib:view;
 
 import std;
@@ -55,7 +56,7 @@ namespace gumlib
 
 			Iterator& operator++(int)
 			{
-				Iterator tmp = *this;
+				Iterator& tmp = *this;
 				++(*this);
 				return tmp;
 			}
@@ -70,13 +71,11 @@ namespace gumlib
 			view_mask_(view_mask),
 			entity_manager_(entity_manager) {}
 
-		// ReSharper disable once CppMemberFunctionMayBeConst - calls non-const function
 		Iterator begin()
 		{
 			return Iterator(entities_.begin(), entities_.end(), view_mask_, entity_manager_);
 		}
 
-		// ReSharper disable once CppMemberFunctionMayBeConst - calls non-const function
 		Iterator end()
 		{
 			return Iterator(entities_.end(), entities_.end(), view_mask_, entity_manager_);

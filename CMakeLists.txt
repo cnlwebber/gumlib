@@ -61,6 +61,9 @@ target_sources(${PROJECT_NAME}
             src/config.ixx
             src/view.ixx
             src/system.ixx
+            src/context.ixx
+            src/input.ixx
+            src/window.ixx
 )
 
 if(TARGET Tracy::Tracy)

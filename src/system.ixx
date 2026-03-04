@@ -1,3 +1,4 @@
+// ReSharper disable CppMemberFunctionMayBeConst - functions call non-const member(s)
 module;
 
 #include <cassert>
@@ -52,6 +53,7 @@ export namespace gumlib
 			if (sparse_[e] == null_index) return;
 
 			const size_t index_to_remove = sparse_[e];
+			// swap and pop for O(1) removal
 			if (const size_t last_index = entities_.size() - 1; index_to_remove != last_index)
 			{
 				const entity last_entity = entities_[last_index];
@@ -74,7 +76,7 @@ export namespace gumlib
 		std::vector<std::unique_ptr<ISystem>> systems_;
 
 	public:
-		void update(const float dt) const
+		void update(const float dt)
 		{
 			for (const auto& system : systems_)
 			{
@@ -82,7 +84,7 @@ export namespace gumlib
 			}
 		}
 
-		void render(const float dt) const
+		void render(const float dt)
 		{
 			for (const auto& system : systems_)
 			{
@@ -95,7 +97,6 @@ export namespace gumlib
 			systems_.push_back(std::move(system));
 		}
 
-		// ReSharper disable once CppMemberFunctionMayBeConst - calls non const function
 		void entity_destroyed(const entity e)
 		{
 			for (const auto& system : systems_)
@@ -104,7 +105,6 @@ export namespace gumlib
 			}
 		}
 
-		// ReSharper disable once CppMemberFunctionMayBeConst - calls non const function
 		void entity_signature_changed(const entity e, const signature& s)
 		{
 			for (const auto& system : systems_)

@@ -85,6 +85,7 @@ export namespace gumlib
 			const sparse_type index_to_remove = sparse_[e];
 			if (index_to_remove == null_index) return;
 
+			// swap and pop retains O(1) removal from sparse set
 			if (const size_t last_index = components_.size() - 1; index_to_remove != last_index)
 			{
 				const entity last_entity = dense_[last_index];
