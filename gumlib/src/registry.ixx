@@ -24,16 +24,16 @@ export namespace gumlib
 		}
 
 		template <typename Component>
-		const Pool<Component>& get_pool()
+		Pool<Component>& get_pool()
 		{
 			return *static_cast<Pool<Component>*>(pools_[get_component_type<Component>()].get());
 		}
 
 		template <typename Component>
-		std::pair<size_t, IPool*> get_pool_info()
+		std::pair<size_t, IPool&> get_pool_info()
 		{
-			auto pool = pools_[ComponentId<Component>::value()];
-			return std::pair<size_t, std::unique_ptr<IPool>>(pool->get_size(), pool.get());
+			auto& pool = get_pool<Component>();
+			return std::pair<size_t, IPool&>(pool.get_size(), pool);
 		}
 
 	public:
@@ -44,12 +44,12 @@ export namespace gumlib
 
 		void update(const float dt)
 		{
-			system_manager_->update(dt);
+			system_manager_->update(dt, *this);
 		}
 
 		void render(const float dt)
 		{
-			system_manager_->render(dt);
+			system_manager_->render(dt, *this);
 		}
 
 		entity create_entity()
@@ -71,7 +71,7 @@ export namespace gumlib
 		template <typename Component>
 		void register_component()
 		{
-			pools_[ComponentId<Component>::value()] = std::make_unique<Pool<Component>>;
+			pools_[get_component_type<Component>()] = std::make_unique<Pool<Component>>();
 		}
 
 		template <typename System, typename... Args>
@@ -79,7 +79,7 @@ export namespace gumlib
 		{
 			std::unique_ptr<System> system = std::make_unique<System>(std::forward<Args>(args)...);
 			system_manager_->register_system(std::move(system));
-			return system_manager_->get_systems().back();
+			return *static_cast<System*>(system_manager_->get_systems().back().get());
 		}
 
 		template <typename Component>
@@ -98,6 +98,12 @@ export namespace gumlib
 			system_manager_->entity_signature_changed(e, entity_manager_->get_signature(e));
 		}
 
+		template <typename Component>
+		Component& get_component(const entity e)
+		{
+			return get_pool<Component>().get_component(e);
+		}
+
 		// return a view of entities that contain Components
 		template <typename... Components>
 		View view()
@@ -107,15 +113,15 @@ export namespace gumlib
 			(mask.set(get_component_type<Components>()), ...);
 
 			// fill vector with info of each Ts (components) pool
-			std::vector<std::pair<size_t, IPool*>> pool_info = {
+			std::array<std::pair<size_t, IPool&>, sizeof...(Components)> pool_infos = {
 				get_pool_info<Components>()...
 			};
 
 			// find the pool with the least amount of tracked entities
-			const std::pair<size_t, IPool*> min_pool = std::min_element(pool_info.begin(), pool_info.end(),
-			                                                            [](const auto& a, const auto& b) { a.first < b.first; });
+			const std::pair<size_t, IPool&> min_pool = *std::min_element(pool_infos.begin(), pool_infos.end(),
+			                                                             [](const auto& a, const auto& b) { return a.first < b.first; });
 
-			return View(min_pool.second->get_entities(), mask, *entity_manager_);
+			return View(min_pool.second.get_entities(), mask, *entity_manager_);
 		}
 	};
 } // gumlib

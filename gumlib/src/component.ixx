@@ -59,7 +59,7 @@ export namespace gumlib
 	};
 
 	template <typename Component>
-	class Pool final : protected IPool
+	class Pool final : public IPool
 	{
 		std::vector<Component> components_;
 
@@ -72,7 +72,7 @@ export namespace gumlib
 
 		void add_component(const entity e, const Component c)
 		{
-			assert(sparse_[e] != null_index);
+			assert(sparse_[e] == null_index);
 
 			dense_.emplace_back(e);
 			components_.emplace_back(c);
@@ -99,14 +99,14 @@ export namespace gumlib
 			sparse_[e] = null_index;
 		}
 
-		Component& get_component(const entity e) const
+		Component& get_component(const entity e)
 		{
 			return components_[sparse_[e]];
 		}
 
 		void entity_destroyed(const entity e) override
 		{
-			if (this.has(e))
+			if (this->has(e))
 			{
 				remove(e);
 			}
