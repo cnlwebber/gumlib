@@ -11,8 +11,11 @@ import :component;
 
 export namespace gumlib
 {
+	class Registry;
+
 	class ISystem
 	{
+	protected:
 		signature mask_;
 		std::vector<entity> entities_;
 		std::vector<sparse_type> sparse_;
@@ -20,8 +23,8 @@ export namespace gumlib
 	public:
 		ISystem() : sparse_(std::vector(max_entities, null_index)) {}
 		virtual ~ISystem() = default;
-		virtual void update(const float dt) = 0;
-		virtual void render(const float dt) {}
+		virtual void update(const float dt, Registry& reg) = 0;
+		virtual void render(const float dt, Registry& reg) {}
 
 		const std::vector<entity>& get_entities() const
 		{
@@ -42,7 +45,7 @@ export namespace gumlib
 		{
 			assert(e < max_entities && "Max entities reached");
 
-			if (sparse_[e] == null_index) return;
+			if (sparse_[e] != null_index) return;
 			entities_.emplace_back(e);
 			sparse_[e] = entities_.size() - 1;
 		}
@@ -52,7 +55,7 @@ export namespace gumlib
 			assert(e < max_entities && "Out of entity bounds");
 			if (sparse_[e] == null_index) return;
 
-			const size_t index_to_remove = sparse_[e];
+			const sparse_type index_to_remove = sparse_[e];
 			// swap and pop for O(1) removal
 			if (const size_t last_index = entities_.size() - 1; index_to_remove != last_index)
 			{
@@ -76,19 +79,19 @@ export namespace gumlib
 		std::vector<std::unique_ptr<ISystem>> systems_;
 
 	public:
-		void update(const float dt)
+		void update(const float dt, Registry& reg)
 		{
 			for (const auto& system : systems_)
 			{
-				system->update(dt);
+				system->update(dt, reg);
 			}
 		}
 
-		void render(const float dt)
+		void render(const float dt, Registry& reg)
 		{
 			for (const auto& system : systems_)
 			{
-				system->render(dt);
+				system->render(dt, reg);
 			}
 		}
 
@@ -109,7 +112,7 @@ export namespace gumlib
 		{
 			for (const auto& system : systems_)
 			{
-				const auto mask = system->get_mask();
+				const signature mask = system->get_mask();
 				if (mask.none()) continue;
 
 				const bool matches = (mask & s) == mask;
@@ -124,7 +127,7 @@ export namespace gumlib
 			}
 		}
 
-		const std::vector<std::unique_ptr<ISystem>>& get_systems() const
+		const std::vector<std::unique_ptr<ISystem>>& get_systems()
 		{
 			return systems_;
 		}

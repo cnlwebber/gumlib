@@ -30,7 +30,6 @@ namespace gumlib
 				}
 			}
 
-		public:
 			using iterator_category = std::input_iterator_tag;
 			using difference_type = std::ptrdiff_t;
 			using pointer = std::vector<entity>::const_iterator;
@@ -48,16 +47,19 @@ namespace gumlib
 			reference operator*() const { return *ptr; }
 			pointer operator->() const { return ptr; }
 
+			// prefix increment
 			Iterator& operator++()
 			{
 				++ptr;
+				find_next_valid();
 				return *this;
 			}
 
+			// postfix increment
 			Iterator& operator++(int)
 			{
 				Iterator& tmp = *this;
-				++(*this);
+				++*this;
 				return tmp;
 			}
 
